@@ -61,7 +61,6 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
         .groupBy("genre") \
         .agg(
             round(avg("averageRating"), 2).alias("avg_rating"),
-            count("*").alias("movie_count")
         ) \
         .orderBy(desc("avg_rating")) \
         .limit(topN) \
@@ -72,21 +71,23 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     
     return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
 
-def save_plots_to_pdf(fig1, fig2):
-    fig = make_subplots(rows=2, cols=1, subplot_titles=("Number of Titles Produced per Decade", "Average Rating by Genre"))
-    for trace in fig1['data']:
-        fig.add_trace(trace, row=1, col=1)
-    
-    for trace in fig2['data']:
-        fig.add_trace(trace, row=2, col=1)
+def save_plots_to_pdf(figures):
+    n = len(figures)
+    print('n:', n)
+    subplots = make_subplots(rows=n, cols=1)
+    for i, fig in enumerate(figures):
+        for trace in fig['data']:
+            print(i)
+            subplots.add_trace(trace, row=i+1, col=1)
 
-    fig.update_layout(height=800, width=600, title_text="IMDd data Analysis")
-    fig.write_image("combined_plots.pdf", format="pdf")
+    subplots.update_layout(height=800, width=600, title_text="IMDd data Analysis")
+    subplots.write_image("combined_plots.pdf", format="pdf")
 
 
 
-def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=10):    
+def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):    
     print("Analyzing top titles for each type by average movie rating...")
+    figures = []
     for titleType in titleTypes:
         print(f"\nTop titles in {titleType}")
         temp_df = titles_actors_ratings_joined \
@@ -99,7 +100,17 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=10):
             .orderBy(desc("avg_rating")) \
             .limit(topN)
             
-        temp_df.show()    
+        temp_df_data = temp_df.collect()
+        
+        # Extract data for plotting
+        titles = [row['primaryTitle'] for row in temp_df_data]
+        avg_ratings = [row['avg_rating'] for row in temp_df_data]
+        
+        # Create a plotly bar chart
+        fig = px.bar(x=titles, y=avg_ratings, labels={'x': 'Title', 'y': 'Average Rating'}, title=f'Top {topN} Titles in {titleType}')
+        figures.append(fig)
+        
+    return figures
 
 def main():
     spark = create_spark_session()
@@ -112,7 +123,8 @@ def main():
         
         fig1 = analyze_production_trends(titles_df)
         fig2 = analyze_genre_ratings(titles_actors_ratings_joined)
-        save_plots_to_pdf(fig1=fig1, fig2=fig2)
+        # figures = analyze_top_titles(titles_actors_ratings_joined, titleTypes)
+        save_plots_to_pdf([fig1, fig2])
         # analyze_top_titles(titles_actors_ratings_joined, titleTypes)  
     finally:
         spark.stop()
