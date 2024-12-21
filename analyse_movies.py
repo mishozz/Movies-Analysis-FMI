@@ -16,8 +16,8 @@ MIN_NUM_OF_VOTES = 5000
 def create_spark_session():
     return SparkSession.builder \
         .appName("IMDb Analysis") \
-        .config("spark.executor.memory", "4g") \
-        .config("spark.driver.memory", "4g") \
+        .config("spark.executor.memory", "8g") \
+        .config("spark.driver.memory", "8g") \
         .getOrCreate()
 
 def load_and_clean_data(spark):
@@ -76,14 +76,6 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
 
 def save_plots_to_pdf(figures):
-    # n = len(figures)
-    # subplots = make_subplots(rows=n, cols=1)
-    # for i, fig in enumerate(figures):
-    #     for trace in fig['data']:
-    #         subplots.add_trace(trace, row=i+1, col=1)
-
-    # subplots.update_layout(height=800, width=600, title_text="IMDd data Analysis")
-    # subplots.write_image("combined_plots.pdf", format="pdf")
      with PdfPages('combined_plots.pdf') as pdf:
         for fig in figures:
             # Convert Plotly figure to a static image
