@@ -73,16 +73,13 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
 
 def save_plots_to_pdf(figures):
     n = len(figures)
-    print('n:', n)
     subplots = make_subplots(rows=n, cols=1)
     for i, fig in enumerate(figures):
         for trace in fig['data']:
-            print(i)
             subplots.add_trace(trace, row=i+1, col=1)
 
     subplots.update_layout(height=800, width=600, title_text="IMDd data Analysis")
     subplots.write_image("combined_plots.pdf", format="pdf")
-
 
 
 def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):    
