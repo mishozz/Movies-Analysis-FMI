@@ -1,8 +1,7 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, avg, count, year, explode, split, desc, round
+from pyspark.sql.functions import col, avg, count, explode, split, desc, round
 from pyspark.sql.types import IntegerType
 import plotly.express as px
-from plotly.subplots import make_subplots
 import time
 import plotly.io as pio
 import matplotlib.pyplot as plt
@@ -107,16 +106,12 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
                 round(avg("averageRating"), 2).alias("avg_rating"),
             ) \
             .orderBy(desc("avg_rating")) \
-            .limit(topN)
-            
+            .limit(topN)    
         temp_df_data = temp_df.collect()
         
-        # Extract data for plotting
         titles = [row['primaryTitle'] for row in temp_df_data]
         avg_ratings = [row['avg_rating'] for row in temp_df_data]
-        print(f"Titles: {titles}")
-        print(f"Average Ratings: {avg_ratings}")
-        # Create a plotly bar chart
+
         if len(titles) != 0 and len(avg_ratings) != 0:
             fig = px.bar(x=titles, y=avg_ratings, labels={'x': 'Title', 'y': 'Average Rating'}, title=f'Top {topN} Titles in {titleType}')
             figures.append(fig)
