@@ -1,13 +1,9 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, avg, count, explode, split, desc, round
 from pyspark.sql.types import IntegerType
-import plotly.express as px
 import time
-import plotly.io as pio
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
-from PIL import Image
-import io
 
 MIN_NUM_OF_VOTES = 5000
 
@@ -53,8 +49,16 @@ def analyze_production_trends(movies_df):
 
     decades = [row['decade'] for row in decade_analysis]
     movie_counts = [row['movie_count'] for row in decade_analysis]
-
-    return px.bar(x=decades, y=movie_counts, labels={'x': 'Decade', 'y': 'Number of Movies'}, title='Number of Movies Produced per Decade')
+    fig, ax = plt.subplots(figsize=(14, 8))
+    ax.bar(decades, movie_counts)
+    ax.set_xlabel('Decade')
+    ax.set_ylabel('Number of Movies (Millions)')
+    ax.set_title('Number of titles produced per decade')
+    plt.xticks(rotation=70, ha='left')
+    plt.tight_layout()
+    
+    return fig
+    # return px.bar(x=decades, y=movie_counts, labels={'x': 'Decade', 'y': 'Number of Movies'}, title='Number of Movies Produced per Decade')
    
 def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     print("Analyzing genres by average rating...")
@@ -72,25 +76,22 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     genres = [row['genre'] for row in genre_analysis]
     avg_ratings = [row['avg_rating'] for row in genre_analysis]
     
-    return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
+    # return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
+    fig, ax = plt.subplots(figsize=(14, 8))
+    ax.bar(genres, avg_ratings)
+    ax.set_xlabel('Genre')
+    ax.set_ylabel('Average Rating')
+    ax.set_title(f'Top {topN} Genres by Average Rating')
+    plt.xticks(rotation=70, ha='left')
+    plt.tight_layout()
+    
+    return fig
 
 def save_plots_to_pdf(figures):
      with PdfPages('combined_plots.pdf') as pdf:
         for fig in figures:
-            # Convert Plotly figure to a static image
-            img_bytes = pio.to_image(fig, format='png')
-            
-            # Read the image from the byte array
-            img = Image.open(io.BytesIO(img_bytes))
-            
-            # Create a new matplotlib figure
-            plt.figure(figsize=(8, 6))
-            plt.imshow(img, aspect='auto')
-            plt.axis('off')
-            
-            # Save the current figure to the PDF
-            pdf.savefig()
-            plt.close()
+            pdf.savefig(fig)
+            plt.close(fig)
 
 
 def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):    
@@ -113,7 +114,13 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
         avg_ratings = [row['avg_rating'] for row in temp_df_data]
 
         if len(titles) != 0 and len(avg_ratings) != 0:
-            fig = px.bar(x=titles, y=avg_ratings, labels={'x': 'Title', 'y': 'Average Rating'}, title=f'Top {topN} Titles in {titleType}')
+            fig, ax = plt.subplots(figsize=(14, 8))
+            ax.bar(titles, avg_ratings)
+            ax.set_xlabel('Title')
+            ax.set_ylabel('Average Rating')
+            ax.set_title(f'Top {topN} Titles in {titleType}')
+            plt.xticks(rotation=70, ha='left')
+            plt.tight_layout()
             figures.append(fig)
         
     return figures
