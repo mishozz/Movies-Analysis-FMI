@@ -4,6 +4,11 @@ from pyspark.sql.types import IntegerType
 import plotly.express as px
 from plotly.subplots import make_subplots
 import time
+import plotly.io as pio
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from PIL import Image
+import io
 
 MIN_NUM_OF_VOTES = 5000
 
@@ -11,7 +16,6 @@ MIN_NUM_OF_VOTES = 5000
 def create_spark_session():
     return SparkSession.builder \
         .appName("IMDb Analysis") \
-        .config("spark.sql.legacy.timeParserPolicy", "LEGACY") \
         .config("spark.executor.memory", "4g") \
         .config("spark.driver.memory", "4g") \
         .getOrCreate()
@@ -72,14 +76,30 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
 
 def save_plots_to_pdf(figures):
-    n = len(figures)
-    subplots = make_subplots(rows=n, cols=1)
-    for i, fig in enumerate(figures):
-        for trace in fig['data']:
-            subplots.add_trace(trace, row=i+1, col=1)
+    # n = len(figures)
+    # subplots = make_subplots(rows=n, cols=1)
+    # for i, fig in enumerate(figures):
+    #     for trace in fig['data']:
+    #         subplots.add_trace(trace, row=i+1, col=1)
 
-    subplots.update_layout(height=800, width=600, title_text="IMDd data Analysis")
-    subplots.write_image("combined_plots.pdf", format="pdf")
+    # subplots.update_layout(height=800, width=600, title_text="IMDd data Analysis")
+    # subplots.write_image("combined_plots.pdf", format="pdf")
+     with PdfPages('combined_plots.pdf') as pdf:
+        for fig in figures:
+            # Convert Plotly figure to a static image
+            img_bytes = pio.to_image(fig, format='png')
+            
+            # Read the image from the byte array
+            img = Image.open(io.BytesIO(img_bytes))
+            
+            # Create a new matplotlib figure
+            plt.figure(figsize=(8, 6))
+            plt.imshow(img, aspect='auto')
+            plt.axis('off')
+            
+            # Save the current figure to the PDF
+            pdf.savefig()
+            plt.close()
 
 
 def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):    
@@ -102,10 +122,12 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
         # Extract data for plotting
         titles = [row['primaryTitle'] for row in temp_df_data]
         avg_ratings = [row['avg_rating'] for row in temp_df_data]
-        
+        print(f"Titles: {titles}")
+        print(f"Average Ratings: {avg_ratings}")
         # Create a plotly bar chart
-        fig = px.bar(x=titles, y=avg_ratings, labels={'x': 'Title', 'y': 'Average Rating'}, title=f'Top {topN} Titles in {titleType}')
-        figures.append(fig)
+        if len(titles) != 0 and len(avg_ratings) != 0:
+            fig = px.bar(x=titles, y=avg_ratings, labels={'x': 'Title', 'y': 'Average Rating'}, title=f'Top {topN} Titles in {titleType}')
+            figures.append(fig)
         
     return figures
 
@@ -118,11 +140,11 @@ def main():
         titles_actors_ratings_joined = join_data(titles_df, ratings_df, actors_df)
         titleTypes = fetch_title_types(titles_df)
         
-        fig1 = analyze_production_trends(titles_df)
-        fig2 = analyze_genre_ratings(titles_actors_ratings_joined)
-        # figures = analyze_top_titles(titles_actors_ratings_joined, titleTypes)
-        save_plots_to_pdf([fig1, fig2])
-        # analyze_top_titles(titles_actors_ratings_joined, titleTypes)  
+        production_trends_plot = analyze_production_trends(titles_df)
+        genres_ratings_plot = analyze_genre_ratings(titles_actors_ratings_joined)
+        top_titles_plots = analyze_top_titles(titles_actors_ratings_joined, titleTypes)
+        combined_plots = [production_trends_plot, genres_ratings_plot] + top_titles_plots
+        save_plots_to_pdf(combined_plots) 
     finally:
         spark.stop()
 
