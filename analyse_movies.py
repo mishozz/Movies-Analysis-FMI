@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col, avg, count, year, explode, split, desc, round
 from pyspark.sql.types import IntegerType
 import plotly.express as px
+from plotly.subplots import make_subplots
 import time
 
 MIN_NUM_OF_VOTES = 5000
@@ -44,11 +45,15 @@ def analyze_production_trends(movies_df):
         .withColumn("decade", (col("startYear") / 10).cast(IntegerType()) * 10) \
         .groupBy("decade") \
         .agg(count("*").alias("movie_count")) \
-        .orderBy("decade")
-        
-    decade_analysis.show()
+        .orderBy("decade") \
+        .collect()
+
+    decades = [row['decade'] for row in decade_analysis]
+    movie_counts = [row['movie_count'] for row in decade_analysis]
+
+    return px.bar(x=decades, y=movie_counts, labels={'x': 'Decade', 'y': 'Number of Movies'}, title='Number of Movies Produced per Decade')
    
-def analyze_genre_ratings(titles_actors_ratings_joined):
+def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     print("Analyzing genres by average rating...")
     genre_analysis = titles_actors_ratings_joined \
         .filter(col("numVotes") >= MIN_NUM_OF_VOTES) \
@@ -58,9 +63,27 @@ def analyze_genre_ratings(titles_actors_ratings_joined):
             round(avg("averageRating"), 2).alias("avg_rating"),
             count("*").alias("movie_count")
         ) \
-        .orderBy(desc("avg_rating"))
+        .orderBy(desc("avg_rating")) \
+        .limit(topN) \
+        .collect()
         
-    genre_analysis.show()   
+    genres = [row['genre'] for row in genre_analysis]
+    avg_ratings = [row['avg_rating'] for row in genre_analysis]
+    
+    return px.bar(x=genres, y=avg_ratings, labels={'x': 'Genre', 'y': 'Average Rating'}, title='Average Rating by Genre')
+
+def save_plots_to_pdf(fig1, fig2):
+    fig = make_subplots(rows=2, cols=1, subplot_titles=("Number of Titles Produced per Decade", "Average Rating by Genre"))
+    for trace in fig1['data']:
+        fig.add_trace(trace, row=1, col=1)
+    
+    for trace in fig2['data']:
+        fig.add_trace(trace, row=2, col=1)
+
+    fig.update_layout(height=800, width=600, title_text="IMDd data Analysis")
+    fig.write_image("combined_plots.pdf", format="pdf")
+
+
 
 def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=10):    
     print("Analyzing top titles for each type by average movie rating...")
@@ -87,9 +110,10 @@ def main():
         titles_actors_ratings_joined = join_data(titles_df, ratings_df, actors_df)
         titleTypes = fetch_title_types(titles_df)
         
-        analyze_production_trends(titles_df)
-        analyze_genre_ratings(titles_actors_ratings_joined)
-        analyze_top_titles(titles_actors_ratings_joined, titleTypes)  
+        fig1 = analyze_production_trends(titles_df)
+        fig2 = analyze_genre_ratings(titles_actors_ratings_joined)
+        save_plots_to_pdf(fig1=fig1, fig2=fig2)
+        # analyze_top_titles(titles_actors_ratings_joined, titleTypes)  
     finally:
         spark.stop()
 
