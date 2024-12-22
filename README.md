@@ -1,4 +1,4 @@
-# IMBd Dataset analysis
+# IMDb Dataset Analysis
 
 ## Local Setup
 
@@ -22,4 +22,4 @@ python3 setup_dataset.py
 python3 main.py
 ```
 
-* The scripts generates a PDF file called **report.pdf** which contains all the plots from the dataset analysis.
+* The script generates a PDF file called **report.pdf** which contains all the plots from the dataset analysis.
