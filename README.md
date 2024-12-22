@@ -1,4 +1,4 @@
-# IMBd Dataset analisys
+# IMBd Dataset analysis
 
 ## Local Setup
 
