@@ -81,7 +81,7 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     return fig
 
 def save_plots_to_pdf(figures):
-     with PdfPages('combined_plots.pdf') as pdf:
+     with PdfPages('report.pdf') as pdf:
         for fig in figures:
             pdf.savefig(fig)
             plt.close(fig)
