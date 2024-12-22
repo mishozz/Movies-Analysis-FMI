@@ -41,15 +41,6 @@ def analyze_production_trends(movies_df):
     movie_counts = [row['movie_count'] for row in decade_analysis]
     
     fig = create_barplot(x=decades, y=movie_counts, x_label='Decade', y_label='Number of Movies (Millions)', barplot_title='Number of titles produced per decade')
-    
-    # fig, ax = plt.subplots(figsize=(14, 8))
-    # ax.bar(decades, movie_counts)
-    # ax.set_xlabel('Decade')
-    # ax.set_ylabel('Number of Movies (Millions)')
-    # ax.set_title('Number of titles produced per decade')
-    # plt.xticks(rotation=70, ha='left')
-    # plt.tight_layout()
-    
     return fig
    
 def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
@@ -69,15 +60,6 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     avg_ratings = [row['avg_rating'] for row in genre_analysis]
     
     fig = create_barplot(x=genres, y=avg_ratings, x_label='Genre', y_label='Average Rating', barplot_title=f'Top {topN} Genres by Average Rating')
-    
-    # fig, ax = plt.subplots(figsize=(14, 8))
-    # ax.bar(genres, avg_ratings)
-    # ax.set_xlabel('Genre')
-    # ax.set_ylabel('Average Rating')
-    # ax.set_title(f'Top {topN} Genres by Average Rating')
-    # plt.xticks(rotation=70, ha='left')
-    # plt.tight_layout()
-    
     return fig
 
 def save_plots_to_pdf(figures):
