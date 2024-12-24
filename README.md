@@ -8,7 +8,7 @@ This project aims to analyze the [IMDb titles dataset](https://www.kaggle.com/da
 - Trends in releases over the years
 - Genre analysis by average rating
 
-The results of the analysis are compiled into a report in PDF format, which includes various plots and visualizations to help understand the data better.
+The data is being analysed via [Apache-Spark](https://spark.apache.org/docs/latest/api/python/index.html) and the tasks are orchestrated by [Apache-Airflow](https://airflow.apache.org/) pipeline.The results of the analysis are compiled into a report in PDF format, which includes various plots and visualizations to help understand the data better.
 
 ## Local Setup
 
@@ -20,17 +20,28 @@ This project requires downloading and preparing a dataset from Kaggle. Follow th
 2. **Pip3**
 3. **8 GB of free space for the IMBd dataset**
 
+### Install python dependencies
+```sh
+pip3 install -r requirements.txt
+```
+
 ### Download the IMBd dataset
 
 ```sh
-pip3 install -r requirements.txt
 python3 setup_dataset.py
 ```
 
-### Run the program
+### Start Airflow
 
 ```sh
-python3 main.py
+export AIRFLOW_HOME=<your_current_dir>
+export AIRFLOW__CORE__LOAD_EXAMPLES=False
+airflow standalone
 ```
 
-* The scriptgs generates a PDF file called **report.pdf** which contains all the plots from the dataset analysis.
+### Access Airflow UI
+`http://localhost:8080/`
+
+* The end result of the pipeline is a PDF file called **report.pdf** which contains all the plots from the dataset analysis.
+
+* The pipeline uses a "in-memory" database abstraction using parquet files to store the state between the pipeline steps.
