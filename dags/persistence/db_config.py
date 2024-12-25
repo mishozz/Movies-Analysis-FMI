@@ -1,13 +1,13 @@
-from dags.persistence.in_memory_db import ParquetDatabase
-from dags.persistence.base_db_interface import DatabaseInterface
+from dags.persistence.dataframe_repository import DataFrameReposotiry
+from dags.persistence.persistence_interface import PersistenceInterface
 
 DEV_ENV = 'DEV'
 PROD_ENV = 'PROD'
 
 
-def get_database(env=DEV_ENV) -> DatabaseInterface:
+def get_dataframe_repository(env=DEV_ENV) -> PersistenceInterface:
     if env == DEV_ENV:
-        return ParquetDatabase()
+        return DataFrameReposotiry()
     elif env == PROD_ENV:
        raise NotImplementedError("Productio database is available yet")
 

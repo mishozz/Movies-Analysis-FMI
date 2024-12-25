@@ -1,4 +1,4 @@
-from airflow_tasks.tasks import load_data, analyze_trends, analyze_genres, analyze_titles, save_report
+from airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report
 from airflow.operators.python import PythonOperator
 
 def load_data_operator(dag):
@@ -7,7 +7,14 @@ def load_data_operator(dag):
         python_callable=load_data,
         dag=dag
     )
-    
+
+def transform_data_operator(dag):
+    return PythonOperator(
+        task_id='transform_data',
+        python_callable=transform_data,
+        dag=dag
+    ) 
+
 def analyze_trends_operator(dag):
     return PythonOperator(
         task_id='analyze_trends',

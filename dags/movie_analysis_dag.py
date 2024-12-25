@@ -1,4 +1,4 @@
-from airflow_operators.operators import load_data_operator, analyze_trends_operator, analyze_genres_operator, analyze_titles_operator, save_report_operator
+from airflow_operators.operators import load_data_operator, transform_data_operator, analyze_trends_operator, analyze_genres_operator, analyze_titles_operator, save_report_operator
 from airflow import DAG
 from datetime import datetime, timedelta
 
@@ -20,4 +20,4 @@ schedule_interval=timedelta(days=1),
 catchup=False
 )
 
-load_data_operator(dag) >> [analyze_trends_operator(dag), analyze_genres_operator(dag), analyze_titles_operator(dag)] >> save_report_operator(dag)
+load_data_operator(dag) >> transform_data_operator(dag) >> [analyze_trends_operator(dag), analyze_genres_operator(dag), analyze_titles_operator(dag)] >> save_report_operator(dag)
