@@ -1,10 +1,10 @@
 import os
 import pickle
 from typing import Any
-from dags.persistence.persistence_interface import PersistenceInterface
+from dags.persistence.base_repository_interface import BaseRepositoryInterface
 from spark.sparkManager import SparkSessionManager
 
-class DataFrameReposotiry(PersistenceInterface):
+class DataFrameRepository(BaseRepositoryInterface):
     def __init__(self, parquet_dir: str = "parquet_store"):
         self.parquet_dir = parquet_dir
         self.spark = SparkSessionManager.get_session()

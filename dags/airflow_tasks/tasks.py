@@ -1,14 +1,13 @@
-from dags.persistence.db_config import get_dataframe_repository
-from data.analyzer import load_and_clean_data, join_data, fetch_title_types, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, save_plots_to_pdf
+from dags.persistence.repository_config import RepositoryConfig
+from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, fetch_title_types, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, save_plots_to_pdf
 from spark.sparkManager import SparkSessionManager
 
 def load_data(**context):
     """Load and clean data, save core datasets to the database"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     spark = SparkSessionManager.get_session()
     movies_df, ratings_df, actors_df = load_and_clean_data(spark)
     
-    # Save the cleaned datasets to the database
     df_repo.save_dataframe('movies_df', movies_df)
     df_repo.save_dataframe('ratings_df', ratings_df)
     df_repo.save_dataframe('actors_df', actors_df)
@@ -17,7 +16,7 @@ def load_data(**context):
 
 def transform_data(**context):
     """Join datasets and parse title types, save transformed data"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     movies_df = df_repo.load_dataframe('movies_df')
     ratings_df = df_repo.load_dataframe('ratings_df')
     actors_df = df_repo.load_dataframe('actors_df')
@@ -32,7 +31,7 @@ def transform_data(**context):
 
 def analyze_trends(**context):
     """Analyze production trends"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     movies_df = df_repo.load_dataframe('movies_df')
     
     fig = analyze_production_trends(movies_df)
@@ -42,7 +41,7 @@ def analyze_trends(**context):
 
 def analyze_genres(**context):
     """Analyze genre ratings"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     joined_df = df_repo.load_dataframe('joined_df')
     
     fig = analyze_genre_ratings(joined_df)
@@ -52,7 +51,7 @@ def analyze_genres(**context):
 
 def analyze_titles(**context):
     """Analyze top titles"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     joined_df = df_repo.load_dataframe('joined_df')
     title_types = df_repo.load_data('title_types')
     
@@ -67,7 +66,7 @@ def analyze_titles(**context):
 
 def save_report(**context):
     """Create PDF report from saved figures"""
-    df_repo =  get_dataframe_repository()
+    df_repo = RepositoryConfig.get_repository_instance()
     
     figures = []
     figures.append(df_repo.load_figure('trends'))

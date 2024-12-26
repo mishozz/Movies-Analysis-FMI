@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any
 
-class PersistenceInterface(ABC):
+class BaseRepositoryInterface(ABC):
     @abstractmethod
     def connect(self):
         pass
