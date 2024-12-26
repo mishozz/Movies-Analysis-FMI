@@ -25,9 +25,8 @@ def join_data(movies_df, ratings_df, actors_df):
         .join(ratings_df, col("movie_id") == ratings_df.tconst) \
         .join(movies_df, col("movie_id") == movies_df.tconst) \
         .withColumnRenamed("primaryName", "actorName") \
-        .drop(movies_df.tconst) \
-        .cache()
-        
+        .drop(movies_df.tconst)
+
 def fetch_title_types(movies_df):
     return movies_df.select("titleType").distinct().rdd.flatMap(lambda x: x).collect()            
         
