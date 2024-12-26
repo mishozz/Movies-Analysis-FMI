@@ -1,9 +1,9 @@
-from airflow_operators.operators import load_data_operator, transform_data_operator, analyze_trends_operator, analyze_genres_operator, analyze_titles_operator, save_report_operator
+from airflow_operators.operators import DataPipelineOperator
 from airflow import DAG
 from datetime import datetime, timedelta
 
 default_args = {
-    'owner': 'airflow',
+    'owner': 'mzlatev',
     'depends_on_past': False,
     'start_date': datetime(2024, 1, 1),
     'email_on_failure': False,
@@ -11,13 +11,20 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=5)
 }
+dag_id = 'imdb_analysis'
 
-dag = DAG(
-'imdb_analysis',
-default_args=default_args,
-description='IMDb data analysis pipeline',
-schedule_interval=timedelta(days=1),
-catchup=False
-)
+def create_dag(dag_id, default_args):
+    dag = DAG(
+        dag_id,
+        default_args=default_args,
+        description='IMDb data analysis pipeline',
+        catchup=False
+    )
 
-load_data_operator(dag) >> transform_data_operator(dag) >> [analyze_trends_operator(dag), analyze_genres_operator(dag), analyze_titles_operator(dag)] >> save_report_operator(dag)
+    with dag:
+        operator = DataPipelineOperator(dag)
+        operator.load_data() >> operator.transform_data() >> [operator.analyze_trends(), operator.analyze_genres(), operator.analyze_titles()] >> operator.save_report()
+
+    return dag
+
+globals()[dag_id] = create_dag(dag_id, default_args)

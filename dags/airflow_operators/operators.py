@@ -1,45 +1,31 @@
 from airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report
 from airflow.operators.python import PythonOperator
 
-def load_data_operator(dag):
-    return PythonOperator(
-        task_id='load_data',
-        python_callable=load_data,
-        dag=dag
-    )
+class DataPipelineOperator:
+    def __init__(self, dag):
+        self.dag = dag
 
-def transform_data_operator(dag):
-    return PythonOperator(
-        task_id='transform_data',
-        python_callable=transform_data,
-        dag=dag
-    ) 
+    def create_operator(self, task_id, python_callable):
+        return PythonOperator(
+            task_id=task_id,
+            python_callable=python_callable,
+            dag=self.dag
+        )
 
-def analyze_trends_operator(dag):
-    return PythonOperator(
-        task_id='analyze_trends',
-        python_callable=analyze_trends,
-        dag=dag
-    )
-    
-def analyze_genres_operator(dag):
-    return PythonOperator(
-        task_id='analyze_genres',
-        python_callable=analyze_genres,
-        dag=dag
-    )
+    def load_data(self):
+        return self.create_operator('load_data', load_data)
 
-def analyze_titles_operator(dag):
-    return PythonOperator(
-        task_id='analyze_titles',
-        python_callable=analyze_titles,
-        dag=dag
-    )
+    def transform_data(self):
+        return self.create_operator('transform_data', transform_data)
 
-def save_report_operator(dag):
-    return PythonOperator(
-        task_id='save_report',
-        python_callable=save_report,
-        dag=dag
-   )    
+    def analyze_trends(self):
+        return self.create_operator('analyze_trends', analyze_trends)
 
+    def analyze_genres(self):
+        return self.create_operator('analyze_genres', analyze_genres)
+
+    def analyze_titles(self):
+        return self.create_operator('analyze_titles', analyze_titles)
+
+    def save_report(self):
+        return self.create_operator('save_report', save_report)
