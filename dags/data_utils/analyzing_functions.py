@@ -83,7 +83,7 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
                 round(avg("averageRating"), 2).alias("avg_rating"),
             ) \
             .orderBy(desc("avg_rating")) \
-            .limit(topN)    
+            .limit(topN)
         temp_df_data = temp_df.collect()
         
         titles = [row['primaryTitle'] for row in temp_df_data]
