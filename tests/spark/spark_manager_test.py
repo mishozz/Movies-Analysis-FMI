@@ -7,6 +7,7 @@ from dags.spark.spark_manager import SparkSessionManager
 class TestSparkSessionManager(unittest.TestCase):
 
     def test_start_stop_session(self):
+        SparkSessionManager._instance = None
         self.assertIsNone(SparkSessionManager._instance)
 
         SparkSessionManager.get_session()
