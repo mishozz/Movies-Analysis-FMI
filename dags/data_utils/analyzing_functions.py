@@ -14,7 +14,6 @@ def load_and_clean_data(spark):
 
     movies_df = movies_df \
         .filter(col("startYear") != "\\N") \
-        .withColumn("startYear", col("startYear").cast(IntegerType())) \
         .withColumn("genres_array", split(col("genres"), ","))
 
     return movies_df, ratings_df, actors_df

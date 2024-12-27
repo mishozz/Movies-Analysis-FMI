@@ -1,6 +1,6 @@
 from dags.persistence.repository_config import RepositoryConfig
 from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, fetch_title_types, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, save_plots_to_pdf
-from spark.sparkManager import SparkSessionManager
+from dags.spark.spark_manager import SparkSessionManager
 
 def load_data(**context):
     """Load and clean data, save core datasets to the database"""

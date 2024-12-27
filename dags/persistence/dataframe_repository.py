@@ -2,7 +2,7 @@ import os
 import pickle
 from typing import Any
 from dags.persistence.base_repository_interface import BaseRepositoryInterface
-from spark.sparkManager import SparkSessionManager
+from dags.spark.spark_manager import SparkSessionManager
 
 class DataFrameRepository(BaseRepositoryInterface):
     def __init__(self, parquet_dir: str = "parquet_store"):
