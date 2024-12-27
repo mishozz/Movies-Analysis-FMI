@@ -46,3 +46,9 @@ airflow standalone
 * The end result of the pipeline is a PDF file named `report.pdf`, which contains all the plots from the dataset analysis.
 
 * The pipeline utilizes an "in-memory" database abstraction using Parquet files to store the state between the pipeline steps.
+
+## Running Unit Tests
+To run the tests, use the following command:
+```sh
+make test
+```
