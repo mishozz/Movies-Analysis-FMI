@@ -1,4 +1,4 @@
-from airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report
+from dags.airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report
 from airflow.operators.python import PythonOperator
 
 class DataPipelineOperator:
