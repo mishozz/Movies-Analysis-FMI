@@ -1,7 +1,10 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 import unittest
 from unittest.mock import patch
-from repository_config import RepositoryConfig, PROD_ENV
-from dataframe_repository import DataFrameRepository
+from dags.persistence.repository_config import RepositoryConfig, PROD_ENV
+from dags.persistence.dataframe_repository import DataFrameRepository
 
 class TestRepositoryConfig(unittest.TestCase):
     def setUp(self):
