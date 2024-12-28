@@ -34,9 +34,7 @@ python3 setup_dataset.py
 ### Start Airflow
 
 ```sh
-export AIRFLOW_HOME=<your_current_dir>
-export AIRFLOW__CORE__LOAD_EXAMPLES=False
-airflow standalone
+make airflow
 ```
 
 ### Access Airflow UI
