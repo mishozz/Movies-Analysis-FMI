@@ -1,5 +1,5 @@
 from dags.persistence.repository_config import RepositoryConfig
-from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, fetch_title_types, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, save_plots_to_pdf, analyze_actors_with_highest_ratings
+from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, fetch_title_types, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, save_plots_to_pdf, analyze_actors_with_highest_ratings, analyze_genres_by_title_count
 from dags.spark.spark_manager import SparkSessionManager
 
 def load_data(**context):
@@ -74,6 +74,16 @@ def analyze_actors(**context):
 
     return "Actors analysis completed"
 
+def analyze_genres_by_count(**context):
+    """Analyze genres by title count"""
+    df_repo = RepositoryConfig.get_repository_instance()
+    joined_df = df_repo.load_dataframe('joined_df')
+    
+    fig = analyze_genres_by_title_count(joined_df)
+    df_repo.save_figure('genres_by_title_count', fig)
+
+    return "Genre count analysis completed"
+
 def save_report(**context):
     """Create PDF report from saved figures"""
     df_repo = RepositoryConfig.get_repository_instance()
@@ -82,13 +92,14 @@ def save_report(**context):
     figures.append(df_repo.load_figure('trends'))
     figures.append(df_repo.load_figure('genres'))
     figures.append(df_repo.load_figure('actors'))
-    
+    figures.append(df_repo.load_figure('genres_by_title_count'))
+
     title_fig_count = df_repo.load_data('title_fig_count')
     for i in range(title_fig_count):
         figures.append(df_repo.load_figure(f'titles_{i}'))
     
     save_plots_to_pdf(figures)
-    
+
     return "Report saved successfully"
 
 def cleanup(**context):
