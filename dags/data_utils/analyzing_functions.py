@@ -112,7 +112,7 @@ def analyze_actors_with_highest_ratings(joined_df):
 
     return fig
 
-def analyze_genres_by_title_count(joined_df):
+def analyze_genres_by_title_count(joined_df, min_title_count=MIN_TITLE_COUNT):
     print("Analyzing genres by title count...")
     
     genre_counts = joined_df \

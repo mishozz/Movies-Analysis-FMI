@@ -4,7 +4,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import unittest
 from unittest.mock import patch, MagicMock
 from pyspark.sql import SparkSession
-from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, analyze_production_trends, analyze_genre_ratings, analyze_top_titles
+from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, analyze_actors_with_highest_ratings, analyze_genres_by_title_count
 from pyspark.sql.functions import col, split
 
 class TestAnalyzingFunctions(unittest.TestCase):
@@ -111,7 +111,61 @@ class TestAnalyzingFunctions(unittest.TestCase):
             self.assertIn('x_label', kwargs)
             self.assertIn('y_label', kwargs)
             self.assertIn('barplot_title', kwargs)
-        self.assertEqual(result_figures, ["mocked_figure"])      
+        self.assertEqual(result_figures, ["mocked_figure"])
+
+    @patch('dags.data_utils.analyzing_functions.create_barplot')
+    def test_analyze_actors_with_highest_ratings(self, mock_create_barplot):
+        data = [
+            ("movie", "Actor A", 8.5),
+            ("movie", "Actor B", 9.0),
+            ("movie", "Actor C", 7.5),
+            ("movie", "Actor D", 8.0),
+            ("movie", "Actor E", 9.5),
+            ("movie", "Actor F", 6.5),
+            ("movie", "Actor G", 7.0),
+            ("movie", "Actor H", 8.2),
+            ("movie", "Actor I", 8.8),
+            ("movie", "Actor J", 9.1)
+        ]
+        schema = ["titleType", "actorName", "averageRating"]
+        joined_df = self.spark.createDataFrame(data, schema)
+
+        mock_create_barplot.return_value = "mocked_figure"
+        result_fig = analyze_actors_with_highest_ratings(joined_df)
+
+        mock_create_barplot.assert_called_once()
+        _, kwargs = mock_create_barplot.call_args
+        self.assertIn('x', kwargs)
+        self.assertIn('y', kwargs)
+        self.assertIn('x_label', kwargs)
+        self.assertIn('y_label', kwargs)
+        self.assertIn('barplot_title', kwargs)
+        self.assertEqual(result_fig, "mocked_figure")
+
+    @patch('dags.data_utils.analyzing_functions.create_piechart')
+    def test_analyze_genres_by_title_count(self, mock_create_piechart):
+        data = [
+            ("movie", ["Action", "Comedy"]),
+            ("movie", ["Action"]),
+            ("movie", ["Drama"]),
+            ("movie", ["Action", "Drama"]),
+            ("movie", ["Comedy"]),
+            ("movie", ["Drama", "Comedy"]),
+        ]
+        schema = ["titleType", "genres_array"]
+        joined_df = self.spark.createDataFrame(data, schema)
+        mock_create_piechart.return_value = "mocked_piechart"
+
+        result_fig = analyze_genres_by_title_count(joined_df, 1)
+
+        mock_create_piechart.assert_called_once()
+        _, kwargs = mock_create_piechart.call_args
+        self.assertIn('labels', kwargs)
+        self.assertIn('values', kwargs)
+        self.assertIn('title', kwargs)
+        self.assertEqual(result_fig, "mocked_piechart")
+
+    
 
 if __name__ == '__main__':
     unittest.main()

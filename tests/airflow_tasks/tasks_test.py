@@ -3,7 +3,7 @@ import os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 import unittest
 from unittest.mock import patch, MagicMock
-from dags.airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report, cleanup
+from dags.airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report, cleanup, analyze_actors, analyze_genres_by_count
 
 class TestTasks(unittest.TestCase):
 
@@ -111,6 +111,41 @@ class TestTasks(unittest.TestCase):
         mock_df_repo.load_data.assert_called_once_with('title_fig_count')
         mock_save_plots_to_pdf.assert_called_once()
         self.assertEqual(result, "Report saved successfully")
+
+
+    @patch('dags.airflow_tasks.tasks.RepositoryConfig.get_repository_instance')
+    @patch('dags.airflow_tasks.tasks.analyze_actors_with_highest_ratings')
+    def test_analyze_actors(self, mock_analyze_actors_with_highest_ratings, mock_get_repository_instance):
+        mock_df_repo = MagicMock()
+        mock_get_repository_instance.return_value = mock_df_repo
+        mock_df_repo.load_dataframe.return_value = MagicMock()
+        mock_analyze_actors_with_highest_ratings.return_value = MagicMock()
+        
+        result = analyze_actors()
+
+        mock_get_repository_instance.assert_called_once()
+        mock_df_repo.load_dataframe.assert_called_once_with('joined_df')
+        mock_analyze_actors_with_highest_ratings.assert_called_once()
+        mock_df_repo.save_figure.assert_called_once()
+        self.assertEqual(result, "Actors analysis completed")
+
+
+    @patch('dags.airflow_tasks.tasks.RepositoryConfig.get_repository_instance')
+    @patch('dags.airflow_tasks.tasks.analyze_genres_by_title_count')
+    def test_analyze_genres_by_count(self, mock_analyze_genres_by_title_count, mock_get_repository_instance):
+        mock_df_repo = MagicMock()
+        mock_get_repository_instance.return_value = mock_df_repo
+        mock_df_repo.load_dataframe.return_value = MagicMock()
+        mock_analyze_genres_by_title_count.return_value = MagicMock()
+        
+        result = analyze_genres_by_count()
+
+        mock_get_repository_instance.assert_called_once()
+        mock_df_repo.load_dataframe.assert_called_once_with('joined_df')
+        mock_analyze_genres_by_title_count.assert_called_once()
+        mock_df_repo.save_figure.assert_called_once_with('genres_by_title_count', mock_analyze_genres_by_title_count.return_value)
+        self.assertEqual(result, "Genre count analysis completed")
+
 
     @patch('dags.airflow_tasks.tasks.SparkSessionManager.stop_session')
     def test_cleanup(self, mock_stop_session):
