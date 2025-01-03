@@ -101,13 +101,13 @@ class TestTasks(unittest.TestCase):
     def test_save_report(self, mock_save_plots_to_pdf, mock_get_repository_instance):
         mock_df_repo = MagicMock()
         mock_get_repository_instance.return_value = mock_df_repo
-        mock_df_repo.load_figure.side_effect = [MagicMock(), MagicMock(), MagicMock(), MagicMock()]
+        mock_df_repo.load_figure.side_effect = [MagicMock(), MagicMock(), MagicMock(), MagicMock(), MagicMock()]
         mock_df_repo.load_data.return_value = 2
 
         result = save_report()
 
         mock_get_repository_instance.assert_called_once()
-        self.assertEqual(mock_df_repo.load_figure.call_count, 4)
+        self.assertEqual(mock_df_repo.load_figure.call_count, 5)
         mock_df_repo.load_data.assert_called_once_with('title_fig_count')
         mock_save_plots_to_pdf.assert_called_once()
         self.assertEqual(result, "Report saved successfully")

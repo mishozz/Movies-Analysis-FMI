@@ -43,7 +43,7 @@ def analyze_production_trends(movies_df):
     
     fig = create_barplot(x=decades, y=movie_counts, x_label='Decade', y_label='Number of Movies (Millions)', barplot_title='Number of titles produced per decade')
     return fig
-   
+
 def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     print("Analyzing genres by average rating...")
     genre_analysis = titles_actors_ratings_joined \
@@ -85,7 +85,7 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
             .orderBy(desc("avg_rating")) \
             .limit(topN)
         temp_df_data = temp_df.collect()
-        
+
         titles = [row['primaryTitle'] for row in temp_df_data]
         avg_ratings = [row['avg_rating'] for row in temp_df_data]
 
@@ -94,6 +94,23 @@ def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):
             figures.append(fig)
         
     return figures
+
+def analyze_actors_with_highest_ratings(joined_df):
+    print("Analyzing actors with the highest average ratings...")
+    top_actors = joined_df \
+        .filter(col("titleType") == "movie") \
+        .groupBy("actorName") \
+        .agg(avg("averageRating").alias("avg_rating")) \
+        .orderBy(col("avg_rating").desc()) \
+        .limit(10) \
+        .collect()
+
+    actors = [row['actorName'] for row in top_actors]
+    avg_ratings = [row['avg_rating'] for row in top_actors]
+
+    fig = create_barplot(x=actors, y=avg_ratings, x_label='Actors', y_label='Average Rating', barplot_title='Movie Actors with Highest Average Ratings')
+
+    return fig
 
 def create_barplot(x, y, x_label, y_label, barplot_title):
     fig, ax = plt.subplots(figsize=(14, 8))

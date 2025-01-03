@@ -1,4 +1,4 @@
-from dags.airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report
+from dags.airflow_tasks.tasks import load_data, transform_data, analyze_trends, analyze_genres, analyze_titles, save_report, analyze_actors
 from airflow.operators.python import PythonOperator
 
 class DataPipelineOperator:
@@ -26,6 +26,9 @@ class DataPipelineOperator:
 
     def analyze_titles(self):
         return self.create_operator('analyze_titles', analyze_titles)
+    
+    def analyze_actors(self):
+        return self.create_operator('analyze_movie_actors_with_highest_ratings', analyze_actors)
 
     def save_report(self):
         return self.create_operator('save_report', save_report)
