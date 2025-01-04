@@ -132,3 +132,18 @@ class DataUtils:
         title_counts = [row['title_count'] for row in title_counts]
 
         return create_piechart(labels=title_types, values=title_counts, title='Titles count by type', legend_title_for_count="Titles count")
+    
+    def analyze_most_productive_actors(self, joined_df):
+        print("Analyzing most productive actors...")
+        productive_actors = joined_df \
+            .groupBy("actorName") \
+            .agg(count("tconst").alias("movie_count")) \
+            .orderBy(col("movie_count").desc()) \
+            .limit(10) \
+            .collect()
+
+        actors = [row['actorName'] for row in productive_actors]
+        movie_counts = [row['movie_count'] for row in productive_actors]
+        
+        fig = create_barplot(x=actors, y=movie_counts, x_label='Actors', y_label='Number of Movies', barplot_title='Most Productive Actors')
+        return fig

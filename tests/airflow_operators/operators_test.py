@@ -75,5 +75,11 @@ class TestDataPipelineOperator(unittest.TestCase):
         self.assertEqual(operator.python_callable.__name__, 'analyze_titles_count_by_type')
         self.assertEqual(operator.dag, self.dag)
 
+    def test_analyze_most_productive_actors(self):
+        operator = self.operator.analyze_most_productive_actors()
+        self.assertEqual(operator.task_id, 'analyze_most_productive_actors')
+        self.assertEqual(operator.python_callable.__name__, 'analyze_most_productive_actors')
+        self.assertEqual(operator.dag, self.dag)
+
 if __name__ == '__main__':
     unittest.main()

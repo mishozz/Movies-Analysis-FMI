@@ -23,7 +23,13 @@ def create_dag(dag_id, default_args):
 
     with dag:
         operator = DataPipelineOperator(dag)
-        operator.load_data() >> operator.transform_data() >> [operator.analyze_trends(), operator.analyze_genres(), operator.analyze_titles(), operator.analyze_actors(), operator.analyze_genres_by_count(), operator.analyze_titles_by_count()] >> operator.save_report()
+        operator.load_data() >> operator.transform_data() >> [operator.analyze_trends(),
+                                                              operator.analyze_genres(),
+                                                              operator.analyze_titles(),
+                                                              operator.analyze_actors(),
+                                                              operator.analyze_genres_by_count(),
+                                                              operator.analyze_titles_by_count(),
+                                                              operator.analyze_most_productive_actors()] >> operator.save_report()
 
     return dag
 

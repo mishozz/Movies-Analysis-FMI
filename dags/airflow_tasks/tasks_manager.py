@@ -88,6 +88,15 @@ class TasksManager:
         self.df_repo.save_figure('titles_count_by_type', fig)
         
         return "Titles count by type analysis completed"
+    
+    def analyze_most_productive_actors(self, **context):
+        """Analyze most productive actors"""
+        joined_df = self.df_repo.load_dataframe('joined_df')
+        
+        fig = self.data_utils.analyze_most_productive_actors(joined_df)
+        self.df_repo.save_figure('most_productive_actors', fig)
+        
+        return "Most productive actors analysis completed"
 
     def save_report(self, **context):
         """Create PDF report from saved figures"""
@@ -96,7 +105,8 @@ class TasksManager:
             self.df_repo.load_figure('genres'),
             self.df_repo.load_figure('actors'),
             self.df_repo.load_figure('genres_by_title_count'),
-            self.df_repo.load_figure('titles_count_by_type')
+            self.df_repo.load_figure('titles_count_by_type'),
+            self.df_repo.load_figure('most_productive_actors')
         ]
 
         title_fig_count = self.df_repo.load_data('title_fig_count')

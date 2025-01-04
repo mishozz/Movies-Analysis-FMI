@@ -42,6 +42,9 @@ class DataPipelineOperator:
     
     def analyze_titles_by_count(self):
         return self.create_operator('analyze_titles_by_count', self.tasks_manager.analyze_titles_count_by_type)
+    
+    def analyze_most_productive_actors(self):
+        return self.create_operator('analyze_most_productive_actors', self.tasks_manager.analyze_most_productive_actors)
 
     def save_report(self):
         return self.create_operator('save_report', self.tasks_manager.save_report)

@@ -164,6 +164,35 @@ class TestAnalyzingFunctions(unittest.TestCase):
         self.assertIn('title', kwargs)
         self.assertEqual(result_fig, "mocked_piechart")
 
+    @patch('dags.data_utils.data_utils.create_barplot')
+    def test_analyze_most_productive_actors(self, mock_create_barplot):
+        data = [
+            ("ttconst1","movie", "Actor A", 1000),
+            ("ttconst2","movie", "Actor B", 1500),
+            ("ttconst3","movie", "Actor C", 2000),
+            ("ttconst4","movie", "Actor D", 2500),
+            ("ttconst5","movie", "Actor E", 3000),
+            ("ttconst6","movie", "Actor F", 3500),
+            ("ttconst7","movie", "Actor G", 4000),
+            ("ttconst8","movie", "Actor H", 4500),
+            ("ttconst9","movie", "Actor I", 5000),
+            ("ttconst10","movie", "Actor J", 5500)
+        ]
+        schema = ["tconst","titleType", "actorName", "numVotes"]
+        joined_df = self.spark.createDataFrame(data, schema)
+
+        mock_create_barplot.return_value = "mocked_figure"
+        result_fig = self.data_utils.analyze_most_productive_actors(joined_df)
+
+        mock_create_barplot.assert_called_once()
+        _, kwargs = mock_create_barplot.call_args
+        self.assertIn('x', kwargs)
+        self.assertIn('y', kwargs)
+        self.assertIn('x_label', kwargs)
+        self.assertIn('y_label', kwargs)
+        self.assertIn('barplot_title', kwargs)
+        self.assertEqual(result_fig, "mocked_figure")
+
     
 
 if __name__ == '__main__':

@@ -112,6 +112,17 @@ class TestTasks(unittest.TestCase):
         self._mock_df_repo.save_figure.assert_called_once_with('titles_count_by_type', self._mock_data_utils.analyze_titles_count_by_type.return_value)
         self.assertEqual(result, "Titles count by type analysis completed")
 
+    def test_analyze_most_productive_actors(self):
+        self._mock_df_repo.load_dataframe.return_value = MagicMock()
+        self._mock_data_utils.analyze_most_productive_actors.return_value = MagicMock()
+        
+        result = self._task_manager.analyze_most_productive_actors()
+
+        self._mock_df_repo.load_dataframe.assert_called_once_with('joined_df')
+        self._mock_data_utils.analyze_most_productive_actors.assert_called_once()
+        self._mock_df_repo.save_figure.assert_called_once_with('most_productive_actors', self._mock_data_utils.analyze_most_productive_actors.return_value)
+        self.assertEqual(result, "Most productive actors analysis completed")
+
     def test_cleanup(self):
         result = self._task_manager.cleanup()
 
