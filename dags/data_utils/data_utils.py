@@ -145,5 +145,5 @@ class DataUtils:
         actors = [row['actorName'] for row in productive_actors]
         movie_counts = [row['movie_count'] for row in productive_actors]
         
-        fig = create_barplot(x=actors, y=movie_counts, x_label='Actors', y_label='Number of Movies', barplot_title='Most Productive Actors')
+        fig = create_barplot(x=actors, y=movie_counts, x_label='Actors', y_label='Number of Titles', barplot_title='Most Productive Actors')
         return fig
