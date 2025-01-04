@@ -2,13 +2,15 @@ from dags.airflow_tasks.tasks_manager import TasksManager
 from airflow.operators.python import PythonOperator
 from dags.spark.spark_manager import SparkSessionManager
 from dags.persistence.repository_config import RepositoryConfig
+from dags.data_utils.data_utils import DataUtils
 
 class DataPipelineOperator:
     def __init__(self, dag):
         self.dag = dag
         df_repo = RepositoryConfig.get_repository_instance()
         spark = SparkSessionManager.get_session()
-        self.tasks_manager = TasksManager(df_repo=df_repo, spark=spark)
+        data_utils = DataUtils()
+        self.tasks_manager = TasksManager(df_repo=df_repo, spark=spark, data_utils=data_utils)
 
     def create_operator(self, task_id, python_callable):
         return PythonOperator(

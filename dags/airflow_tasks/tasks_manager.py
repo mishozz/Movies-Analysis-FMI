@@ -1,18 +1,14 @@
-from dags.data_utils.analyzing_functions import (
-    load_and_clean_data, join_data, fetch_title_types, analyze_production_trends,
-    analyze_genre_ratings, analyze_top_titles, analyze_actors_with_highest_ratings,
-    analyze_genres_by_title_count
-)
 from dags.data_utils.plotlib_utils import save_plots_to_pdf
 
 class TasksManager:
-    def __init__(self, df_repo, spark):
-        self.df_repo =df_repo
+    def __init__(self, df_repo, spark, data_utils):
+        self.df_repo = df_repo
         self.spark = spark
+        self.data_utils = data_utils
 
     def load_data(self, **context):
         """Load and clean data, save core datasets to the database"""
-        movies_df, ratings_df, actors_df = load_and_clean_data(self.spark)
+        movies_df, ratings_df, actors_df = self.data_utils.load_and_clean_data(self.spark)
         
         self.df_repo.save_dataframe('movies_df', movies_df)
         self.df_repo.save_dataframe('ratings_df', ratings_df)
@@ -26,8 +22,8 @@ class TasksManager:
         ratings_df = self.df_repo.load_dataframe('ratings_df')
         actors_df = self.df_repo.load_dataframe('actors_df')
         
-        titles_actors_ratings_joined = join_data(movies_df, ratings_df, actors_df)
-        title_types = fetch_title_types(movies_df)
+        titles_actors_ratings_joined = self.data_utils.join_data(movies_df, ratings_df, actors_df)
+        title_types = self.data_utils.fetch_title_types(movies_df)
         
         self.df_repo.save_dataframe('joined_df', titles_actors_ratings_joined)
         self.df_repo.save_data('title_types', title_types)
@@ -38,7 +34,7 @@ class TasksManager:
         """Analyze production trends"""
         movies_df = self.df_repo.load_dataframe('movies_df')
         
-        fig = analyze_production_trends(movies_df)
+        fig = self.data_utils.analyze_production_trends(movies_df)
         self.df_repo.save_figure('trends', fig)
         
         return "Production trends analyzed"
@@ -47,7 +43,7 @@ class TasksManager:
         """Analyze genre ratings"""
         joined_df = self.df_repo.load_dataframe('joined_df')
         
-        fig = analyze_genre_ratings(joined_df)
+        fig = self.data_utils.analyze_genre_ratings(joined_df)
         self.df_repo.save_figure('genres', fig)
         
         return "Genre analysis completed"
@@ -57,7 +53,7 @@ class TasksManager:
         joined_df = self.df_repo.load_dataframe('joined_df')
         title_types = self.df_repo.load_data('title_types')
         
-        figs = analyze_top_titles(joined_df, title_types)
+        figs = self.data_utils.analyze_top_titles(joined_df, title_types)
         
         for i, fig in enumerate(figs):
             self.df_repo.save_figure(f'titles_{i}', fig)
@@ -70,7 +66,7 @@ class TasksManager:
         """Analyzing actors with the highest average ratings"""
         joined_df = self.df_repo.load_dataframe('joined_df')
         
-        fig = analyze_actors_with_highest_ratings(joined_df)
+        fig = self.data_utils.analyze_actors_with_highest_ratings(joined_df)
         self.df_repo.save_figure('actors', fig)
 
         return "Actors analysis completed"
@@ -79,7 +75,7 @@ class TasksManager:
         """Analyze genres by title count"""
         joined_df = self.df_repo.load_dataframe('joined_df')
         
-        fig = analyze_genres_by_title_count(joined_df)
+        fig = self.data_utils.analyze_genres_by_title_count(joined_df)
         self.df_repo.save_figure('genres_by_title_count', fig)
 
         return "Genre count analysis completed"

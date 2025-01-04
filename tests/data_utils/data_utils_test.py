@@ -4,19 +4,19 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 import unittest
 from unittest.mock import patch, MagicMock
 from pyspark.sql import SparkSession
-from dags.data_utils.analyzing_functions import load_and_clean_data, join_data, analyze_production_trends, analyze_genre_ratings, analyze_top_titles, analyze_actors_with_highest_ratings, analyze_genres_by_title_count
+from dags.data_utils.data_utils import DataUtils
 from pyspark.sql.functions import col, split
 
 class TestAnalyzingFunctions(unittest.TestCase):
 
     def setUp(self):
         self.spark = SparkSession.builder.master("local[1]").appName("Test").getOrCreate()
+        self.data_utils = DataUtils()
 
     def tearDown(self):
         self.spark.stop()
 
-    @patch('pyspark.sql.SparkSession')
-    def test_load_and_clean_data(self, mock_spark_session):
+    def test_load_and_clean_data(self):
         titles_df = MagicMock()
         ratings_df = MagicMock()
         actors_df = MagicMock()
@@ -26,9 +26,8 @@ class TestAnalyzingFunctions(unittest.TestCase):
         
         mock_spark = MagicMock()
         mock_spark.read.csv.side_effect = [titles_df, ratings_df, actors_df]
-        mock_spark_session.builder.getOrCreate.return_value = mock_spark
 
-        cleaned_titles_df, _, _ = load_and_clean_data(mock_spark)
+        cleaned_titles_df, _, _ = self.data_utils.load_and_clean_data(mock_spark)
         
         self.assertTrue(cleaned_titles_df.filter.called)
         self.assertTrue(cleaned_titles_df.withColumn.called)
@@ -42,16 +41,16 @@ class TestAnalyzingFunctions(unittest.TestCase):
         ratings_df = self.spark.read.csv(ratings_path, sep='\t', header=True, inferSchema=True)
         actors_df = self.spark.read.csv(actors_path, sep='\t', header=True, inferSchema=True)
 
-        result_df = join_data(movies_df, ratings_df, actors_df)
+        result_df = self.data_utils.join_data(movies_df, ratings_df, actors_df)
         self.assertEqual(result_df.count(), 2)
         
-    @patch('dags.data_utils.analyzing_functions.create_barplot')
+    @patch('dags.data_utils.data_utils.create_barplot')
     def test_analyze_production_trends(self, mock_create_barplot):
         movies_path = "test_data_samples/titles.tsv"
         movies_df = self.spark.read.csv(movies_path, sep='\t', header=True, inferSchema=True)
         mock_create_barplot.return_value = "mocked_figure"
 
-        result_fig = analyze_production_trends(movies_df)
+        result_fig = self.data_utils.analyze_production_trends(movies_df)
 
         mock_create_barplot.assert_called_once()
         _, kwargs = mock_create_barplot.call_args
@@ -62,7 +61,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         self.assertIn('barplot_title', kwargs)
         self.assertEqual(result_fig, "mocked_figure")
         
-    @patch('dags.data_utils.analyzing_functions.create_barplot')
+    @patch('dags.data_utils.data_utils.create_barplot')
     def test_analyze_genre_ratings(self, mock_create_barplot):
         data = [
             ("tt0000001", "Action,Comedy", 7.0, 1000),
@@ -76,7 +75,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         titles_actors_ratings_joined = titles_actors_ratings_joined.withColumn("genres_array", split(col("genres_array"), ","))
 
         mock_create_barplot.return_value = "mocked_figure"
-        result_fig = analyze_genre_ratings(titles_actors_ratings_joined, topN=3)
+        result_fig = self.data_utils.analyze_genre_ratings(titles_actors_ratings_joined, topN=3)
 
         mock_create_barplot.assert_called_once()
         _, kwargs = mock_create_barplot.call_args
@@ -87,7 +86,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         self.assertIn('barplot_title', kwargs)
         self.assertEqual(result_fig, "mocked_figure")
     
-    @patch('dags.data_utils.analyzing_functions.create_barplot')
+    @patch('dags.data_utils.data_utils.create_barplot')
     def test_analyze_top_titles(self, mock_create_barplot):
         data = [
             ("tt0000001", "Action", "Movie", "Title1", 7.0, 11000),
@@ -102,7 +101,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         mock_create_barplot.return_value = "mocked_figure"
 
         titleTypes = ["Movie"]
-        result_figures = analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=3)
+        result_figures = self.data_utils.analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=3)
         mock_create_barplot.assert_called()
         for call in mock_create_barplot.call_args_list:
             _, kwargs = call
@@ -113,7 +112,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
             self.assertIn('barplot_title', kwargs)
         self.assertEqual(result_figures, ["mocked_figure"])
 
-    @patch('dags.data_utils.analyzing_functions.create_barplot')
+    @patch('dags.data_utils.data_utils.create_barplot')
     def test_analyze_actors_with_highest_ratings(self, mock_create_barplot):
         data = [
             ("movie", "Actor A", 8.5),
@@ -131,7 +130,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         joined_df = self.spark.createDataFrame(data, schema)
 
         mock_create_barplot.return_value = "mocked_figure"
-        result_fig = analyze_actors_with_highest_ratings(joined_df)
+        result_fig = self.data_utils.analyze_actors_with_highest_ratings(joined_df)
 
         mock_create_barplot.assert_called_once()
         _, kwargs = mock_create_barplot.call_args
@@ -142,7 +141,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         self.assertIn('barplot_title', kwargs)
         self.assertEqual(result_fig, "mocked_figure")
 
-    @patch('dags.data_utils.analyzing_functions.create_piechart')
+    @patch('dags.data_utils.data_utils.create_piechart')
     def test_analyze_genres_by_title_count(self, mock_create_piechart):
         data = [
             ("movie", ["Action", "Comedy"]),
@@ -156,7 +155,7 @@ class TestAnalyzingFunctions(unittest.TestCase):
         joined_df = self.spark.createDataFrame(data, schema)
         mock_create_piechart.return_value = "mocked_piechart"
 
-        result_fig = analyze_genres_by_title_count(joined_df, 1)
+        result_fig = self.data_utils.analyze_genres_by_title_count(joined_df, 1)
 
         mock_create_piechart.assert_called_once()
         _, kwargs = mock_create_piechart.call_args
