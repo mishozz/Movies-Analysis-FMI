@@ -41,7 +41,7 @@ class DataUtils:
         decades = [row['decade'] for row in decade_analysis]
         movie_counts = [row['movie_count'] for row in decade_analysis]
         
-        fig = create_barplot(x=decades, y=movie_counts, x_label='Decade', y_label='Number of Movies (Millions)', barplot_title='Number of titles produced per decade')
+        fig = create_barplot(x=decades, y=movie_counts, x_label='Decade', y_label='Number of Titles (Millions)', barplot_title='Number of titles produced per decade')
         return fig
 
     def analyze_genre_ratings(self, titles_actors_ratings_joined, topN=10):
@@ -119,4 +119,16 @@ class DataUtils:
         genres = [row['genre'] for row in genre_counts]
         title_counts = [row['title_count'] for row in genre_counts]
 
-        return create_piechart(labels=genres, values=title_counts, title=f'Genres by Title Count with more than {MIN_TITLE_COUNT} titles')
+        return create_piechart(labels=genres, values=title_counts, title=f'Genres by Title Count with more than {MIN_TITLE_COUNT} titles', legend_title_for_count="Genres count")
+
+    def analyze_titles_count_by_type(self, movies_df):
+        print("Analyzing titles count by type...")
+        title_counts = movies_df \
+            .groupBy("titleType") \
+            .agg(count("*").alias("title_count")) \
+            .collect()
+
+        title_types = [row['titleType'] for row in title_counts]
+        title_counts = [row['title_count'] for row in title_counts]
+
+        return create_piechart(labels=title_types, values=title_counts, title='Titles count by type', legend_title_for_count="Titles count")

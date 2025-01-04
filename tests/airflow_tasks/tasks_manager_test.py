@@ -100,6 +100,18 @@ class TestTasks(unittest.TestCase):
         self._mock_df_repo.save_figure.assert_called_once_with('genres_by_title_count', self._mock_data_utils.analyze_genres_by_title_count.return_value)
         self.assertEqual(result, "Genre count analysis completed")
 
+        
+    def test_analyze_titles_count_by_type(self):
+        self._mock_df_repo.load_dataframe.return_value = MagicMock()
+        self._mock_data_utils.analyze_titles_count_by_type.return_value = MagicMock()
+        
+        result = self._task_manager.analyze_titles_count_by_type()
+
+        self._mock_df_repo.load_dataframe.assert_called_once_with('movies_df')
+        self._mock_data_utils.analyze_titles_count_by_type.assert_called_once()
+        self._mock_df_repo.save_figure.assert_called_once_with('titles_count_by_type', self._mock_data_utils.analyze_titles_count_by_type.return_value)
+        self.assertEqual(result, "Titles count by type analysis completed")
+
     def test_cleanup(self):
         result = self._task_manager.cleanup()
 

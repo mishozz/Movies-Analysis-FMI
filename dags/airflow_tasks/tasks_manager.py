@@ -79,6 +79,15 @@ class TasksManager:
         self.df_repo.save_figure('genres_by_title_count', fig)
 
         return "Genre count analysis completed"
+    
+    def analyze_titles_count_by_type(self, **context):
+        """Analyze titles count by type"""
+        movies_df = self.df_repo.load_dataframe('movies_df')
+        
+        fig = self.data_utils.analyze_titles_count_by_type(movies_df)
+        self.df_repo.save_figure('titles_count_by_type', fig)
+        
+        return "Titles count by type analysis completed"
 
     def save_report(self, **context):
         """Create PDF report from saved figures"""
@@ -86,7 +95,8 @@ class TasksManager:
             self.df_repo.load_figure('trends'),
             self.df_repo.load_figure('genres'),
             self.df_repo.load_figure('actors'),
-            self.df_repo.load_figure('genres_by_title_count')
+            self.df_repo.load_figure('genres_by_title_count'),
+            self.df_repo.load_figure('titles_count_by_type')
         ]
 
         title_fig_count = self.df_repo.load_data('title_fig_count')

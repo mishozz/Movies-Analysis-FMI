@@ -20,7 +20,7 @@ def create_barplot(x, y, x_label, y_label, barplot_title):
 
     return fig
 
-def create_piechart(labels, values, title):
+def create_piechart(labels, values, title, legend_title_for_count):
     def autopct_func(pct):
         return ('%1.1f%%' % pct) if pct > 3 else ''
 
@@ -31,11 +31,15 @@ def create_piechart(labels, values, title):
         autopct=autopct_func,
         startangle=140,
         textprops={'fontsize': 10}
-    )  
+    )
+
+    total = sum(values)
+    labels_with_counts = [f"{label} ({value})" for label, value in zip(labels, values)]
+
     ax.legend(
         wedges,
-        labels,
-        title="Genres",
+        labels_with_counts,
+        title=f"{legend_title_for_count} (Total: {total})",
         loc="center left",
         bbox_to_anchor=(1, 0, 0.5, 1),
         fontsize=10
