@@ -1,9 +1,6 @@
 from pyspark.sql.functions import col, avg, count, explode, split, desc, round
 from pyspark.sql.types import IntegerType
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
+from dags.data_utils.plotlib_utils import create_barplot, create_piechart
 
 MIN_NUM_OF_VOTES = 5000
 MIN_TITLE_COUNT = 20000
@@ -64,12 +61,6 @@ def analyze_genre_ratings(titles_actors_ratings_joined, topN=10):
     fig = create_barplot(x=genres, y=avg_ratings, x_label='Genre', y_label='Average Rating', barplot_title=f'Top {topN} Genres by Average Rating')
     return fig
 
-def save_plots_to_pdf(figures):
-     with PdfPages('report.pdf') as pdf:
-        for fig in figures:
-            pdf.savefig(fig)
-            plt.close(fig)
-
 def analyze_top_titles(titles_actors_ratings_joined, titleTypes, topN=5):    
     print("Analyzing top titles for each type by average movie rating...")
     figures = []
@@ -127,39 +118,3 @@ def analyze_genres_by_title_count(joined_df, min_title_count=MIN_TITLE_COUNT):
     title_counts = [row['title_count'] for row in genre_counts]
 
     return create_piechart(labels=genres, values=title_counts, title=f'Genres by Title Count with more than {MIN_TITLE_COUNT} titles')
-
-def create_barplot(x, y, x_label, y_label, barplot_title):
-    fig, ax = plt.subplots(figsize=(14, 8))
-    ax.bar(x, y)
-    ax.set_xlabel(x_label)
-    ax.set_ylabel(y_label)
-    ax.set_title(barplot_title)
-    plt.xticks(rotation=70, ha='left')
-    plt.tight_layout()
-
-    return fig
-
-def create_piechart(labels, values, title):
-    def autopct_func(pct):
-        return ('%1.1f%%' % pct) if pct > 3 else ''
-
-    fig, ax = plt.subplots(figsize=(14, 8))
-
-    wedges, _, _ = ax.pie(
-        values,
-        autopct=autopct_func,
-        startangle=140,
-        textprops={'fontsize': 10}
-    )  
-    ax.legend(
-        wedges,
-        labels,
-        title="Genres",
-        loc="center left",
-        bbox_to_anchor=(1, 0, 0.5, 1),
-        fontsize=10
-    )
-    ax.set_title(title, fontsize=14)
-    plt.tight_layout()
-
-    return fig
