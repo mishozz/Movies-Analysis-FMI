@@ -5,6 +5,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 def save_plots_to_pdf(figures):
      with PdfPages('report.pdf') as pdf:
+        create_initial_page(pdf)
         for fig in figures:
             pdf.savefig(fig)
             plt.close(fig)
@@ -48,3 +49,18 @@ def create_piechart(labels, values, title, legend_title_for_count):
     plt.tight_layout()
 
     return fig
+
+def create_initial_page(pdf):
+    fig, ax = plt.subplots(figsize=(14, 8))
+    ax.axis('off')
+    title = "IMDb Dataset Analysis Report"
+    paragraph = ("This document is an automatically generated PDF report from the IMDb Data Analysis Pipeline. \n "
+                "It contains various barplots and piecharts that provide a comprehensive analysis of the IMDb dataset. \n"
+                "The visualizations included in this report aim to offer insights into trends, genres, titles, and actors within the dataset. \n"
+                "We hope this report helps you understand the IMDb dataset.")
+
+    ax.text(0.5, 0.8, title, transform=ax.transAxes, fontsize=28, ha='center', color='blue')
+    ax.text(0.05, 0.6, paragraph, fontsize=14, ha='left', va='top', wrap=True, transform=ax.transAxes)
+
+    pdf.savefig(fig)
+    plt.close(fig)
