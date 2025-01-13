@@ -12,6 +12,11 @@ class DataUtils:
         ratings_df = spark.read.csv("ratings.tsv", sep="\t", header=True)
         actors_df = spark.read.csv("actors.tsv", sep="\t", header=True)
 
+        actors_df = actors_df \
+            .withColumn("primaryProfession", split(col("primaryProfession"), ",")) \
+            .withColumn("primaryProfession", explode(col("primaryProfession"))) \
+            .filter((col("primaryProfession") == "actor") | (col("primaryProfession") == "actress"))
+
         movies_df = movies_df \
             .filter((col("startYear") != "\\N") & (col("genres") != "\\N")) \
             .withColumn("genres_array", split(col("genres"), ","))
