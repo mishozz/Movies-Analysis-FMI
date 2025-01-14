@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 
 def save_plots_to_pdf(figures):
-     with PdfPages('report.pdf') as pdf:
+     with PdfPages('imbd_analysis_visualized.pdf') as pdf:
         create_initial_page(pdf)
         for fig in figures:
             pdf.savefig(fig)

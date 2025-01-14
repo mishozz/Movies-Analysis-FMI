@@ -8,7 +8,7 @@ This project aims to analyze the [IMDb titles dataset](https://www.kaggle.com/da
 - Trends in releases over the years
 - Genre analysis by average rating
 
-The data is analyzed using [Apache Spark](https://spark.apache.org/docs/latest/api/python/index.html), and the tasks are orchestrated by an [Apache Airflow](https://airflow.apache.org/) pipeline. The results of the analysis are compiled into a comprehensive report in PDF format, which includes various plots and visualizations to facilitate a better understanding of the data.
+The data is analyzed using [Apache Spark](https://spark.apache.org/docs/latest/api/python/index.html), and the tasks are orchestrated by an [Apache Airflow](https://airflow.apache.org/) pipeline. The results of the analysis are compiled into a comprehensive report in PDF format *(imbd_analysis_visualized.pdf)*, which includes various plots and visualizations to facilitate a better understanding of the data.
 
 ## Local Setup
 
